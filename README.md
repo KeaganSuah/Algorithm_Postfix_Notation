@@ -1,4 +1,4 @@
-# Postfix++ Interpreter (JavaScript)
+#  Postfix++ Interpreter (JavaScript)
 
 A command-line **Postfix (Reverse Polish Notation) calculator** with **variable support (A–Z)**, written in JavaScript. It evaluates expressions like `3 4 +` and extends standard postfix by allowing **assignment**, **deletion**, and **versioned values per variable** using a simple hash table with chaining. Built as part of an algorithms & data structures coursework.
 
