@@ -1,0 +1,306 @@
+class Node
+    function constructor(value)
+        this.value ← value
+        this.next ← NULL
+    end function
+end class
+
+class LinkedList
+    function constructor()
+        this.head ← NULL
+    end function
+
+    function append(value)
+        newNode ← new Node(value)
+        if this.head = NULL then
+            this.head ← newNode
+            return
+        end if
+        curr ← this.head
+        while curr.next ≠ NULL do
+            curr ← curr.next
+        end while
+        curr.next ← newNode
+    end function
+
+    function toArray()
+        arr ← empty array
+        curr ← this.head
+        while curr ≠ NULL do
+            append arr, curr.value
+            curr ← curr.next
+        end while
+        return arr
+    end function
+
+    // Print values as a chain
+    function printValues(key)
+        curr ← this.head
+        chain ← ""
+        while curr ≠ NULL do
+            chain ← chain + curr.value
+            if curr.next ≠ NULL then
+                chain ← chain + " -> "
+            end if
+            curr ← curr.next
+        end while
+        print "Variable "+ key +" has values: "+ chain +"
+    end function
+end class
+
+class HashTable
+    function constructor()
+        buckets ← array of size 26 initialized to NULL
+        totalValues ← 0
+    end function
+  
+    function indexForKey(variableKey)
+        offset ← get ASCII value of "A"
+        index ← get ASCII value of variableKey[0 - offset
+        return index
+    end function
+
+    function set(variableKey, storedValue)
+        i ← this.indexForKey(variableKey)
+        if this.buckets[i] = NULL then
+            this.buckets[i] ← new LinkedList()
+        end if
+        this.buckets[i].append(storedValue)
+        this.totalValues ← this.totalValues + 1
+    end function
+
+    function get_all_keys(variableKey)
+        i ← this.indexForKey(variableKey)
+        chain ← this.buckets[i]
+        if chain = NULL then
+            return empty array
+        end if
+        return chain.toArray()
+    end function
+
+    function removeKey(variableKey)
+        i ← this.indexForKey(variableKey)
+        chain ← this.buckets[i]
+        if chain = NULL then
+            return FALSE
+        end if
+        arr ← chain.toArray()
+        this.totalValues ← this.totalValues - length(arr)
+        this.buckets[i] ← NULL
+        return TRUE
+    end function
+
+    // Return the LinkedList object for a key
+    function getList(variableKey)
+        i ← this.indexForKey(variableKey)
+        return this.buckets[i]
+    end function
+end class
+
+class Stack
+    function constructor()
+        this.items ← empty array
+    end function
+
+    function push(el)
+        if top= Size(A)−1 then
+            ExtendAndCopy(A)
+        end if
+        top ←top + 1
+        A[top] ← el
+    end function
+
+    function pop()
+        if top=−1 then
+            return
+        end if
+        top ← top−1
+    end function
+
+    function isEmpty()
+        if top=−1 then
+            return true
+        end if 
+        return false
+    end function
+
+    function size()
+        return length(this.items)
+    end function
+end class
+
+PostfixStack ← new Stack
+Hashtable ← new Hashtable
+
+function regex_check_integer(operand)
+    // Returns TRUE if operand matches the pattern “-?[0-9]+”
+    if operand matches regex “^-?\\d+$” then
+        return TRUE
+    else
+        return FALSE
+    end if
+end function
+
+function regex_check_key(operand)
+    // Returns TRUE if operand is a single uppercase letter A–Z
+    if operand matches regex “^[A-Z]$” then
+        return TRUE
+    else
+        return FALSE
+    end if
+end function
+
+function regex_check_key_index(operand)
+    // Returns TRUE if operand is letter A–Z followed by one or more digits
+    if operand matches regex “^[A-Z]\\d+$” then
+        return TRUE
+    else
+        return FALSE
+    end if
+end function
+
+function validate_single_operand(operand)
+    // Check if operand is an integer literal
+    if regex_check_integer(operand) then
+        return operand
+    end if
+
+    // Check if operand is a variable with index, e.g. “A0”
+    if regex_check_key_index(operand) then
+        key ← operand[0]
+        index ← to_integer(substring(operand, 1 through end))
+        values ← Hashtable.get_all_keys(key)
+
+        if length(values) = 0 then
+            print “Variable “ + key + “ is not assigned”
+            return FALSE
+        end if
+
+        if length(values) ≤ 1 then
+            print “Cannot index variable “ + key + “ with only one value”
+            return FALSE
+        end if
+
+        if index < 0 ∨ index ≥ length(values) then
+            print “Invalid index “ + to_string(index) + “ for “ + key + “” 
+            return FALSE
+        end if
+
+        return values[index]
+    end if
+
+    // Check if operand is a single-letter variable
+    if regex_check_key(operand) then
+        values ← Hashtable.get_all_keys(operand)
+        if length(values) = 0 then
+            print “Variable “ + operand + “ is not assigned”
+            return FALSE
+        end if
+        if length(values) > 1 then
+            list ← Hashtable.getList(operand)
+            list.printValues(operand)
+            return FALSE
+        end if
+        return values[0]
+    end if
+
+    print “Invalid operand: “ + operand + “”
+    return FALSE
+end function
+
+function clear_stack()
+    while ¬PostfixStack.isEmpty() do
+        PostfixStack.pop()
+    end while
+end function
+
+function check_key_deletion(leftOperand)
+    removed ← Hashtable.removeKey(leftOperand)
+    if removed = TRUE then
+        print “Removed all values under “ + leftOperand + “”
+        return TRUE
+    else
+        print “Variable “ + leftOperand + “ is not present”
+        return FALSE
+    end if
+end function
+
+function perform_arithmetic(operator, leftOperand, rightOperand)
+    leftResolved ← validate_single_operand(leftOperand)
+    rightResolved ← validate_single_operand(rightOperand)
+    if leftResolved = FALSE ∨ rightResolved = FALSE then
+        return FALSE
+    end if
+
+    n1 ← to_float(leftResolved)
+    n2 ← to_float(rightResolved)
+    switch operator do
+        case “+”:
+            result ← n1 + n2
+        case “−”:
+            result ← n1 − n2
+        case “*”:
+            result ← n1 * n2
+        case “/”:
+            if n2 = 0 then
+                print “Error: Division by zero”
+                return FALSE
+            end if
+            result ← n1 / n2
+        case “%”:
+            if n2 = 0 then
+                print “Error: Modulo by zero”
+                return FALSE
+            end if
+            result ← n1 % n2
+        case “^”:
+            result ← power(n1, n2)
+        case “r”:
+            result ← power(n1, 1 / n2)
+        case “l”:
+            if n1 ≤ 0 ∨ n1 = 1 ∨ n2 ≤ 0 then
+                print “Error: Invalid base or argument for logarithm”
+                return FALSE
+            end if
+            result ← log(n2) / log(n1)
+        otherwise:
+            print “Invalid operator: “ + operator + “”
+            return FALSE
+    end switch
+
+    PostfixStack.push(to_string(result))
+end function
+
+function postfix_calculator(line)
+    tokens ← split(line.trim(), whitespace)
+    clear_stack()
+
+    for i ← 0 to length(tokens) − 1 do
+        token ← tokens[i]
+        if regex_check_integer(token) ∨ regex_check_key(token) ∨ regex_check_key_index(token) then
+            PostfixStack.push(token)
+        else
+            if PostfixStack.size() < 2 then
+                print “Invalid input: not enough operands”
+                return FALSE
+            end if
+            rightOperand ← PostfixStack.pop()
+            leftOperand ← PostfixStack.pop()
+
+            if token = “−” ∧ regex_check_key(leftOperand) ∧ leftOperand = rightOperand then
+                return check_key_deletion(leftOperand)
+            else if token = “=” ∧ regex_check_integer(rightOperand) then
+                Hashtable.set(leftOperand, rightOperand)
+                print leftOperand + “ = ” + rightOperand
+                return TRUE
+            else
+                perform_arithmetic(token, leftOperand, rightOperand)
+            end if
+        end if
+    end for
+
+    if PostfixStack.size() = 1 then
+        finalResult ← to_float(PostfixStack.pop())
+        print “result = ” + to_string(finalResult)
+    end if
+end function
